@@ -61,6 +61,10 @@ def do_error(error):
 
 if __name__ == '__main__':
 
+	timestamp = cli('show clock').strip()
+	hostname = cli('show run | i hostname').strip()[9:]
+	user = cli('show log | i SYS-5-CONFIG').split()[-4:-3][0]
+
 	old_cfg_fn = get_cfg_fn()
 
 	if not old_cfg_fn:
@@ -83,12 +87,14 @@ if __name__ == '__main__':
 	d = compare_configs(old_cfg,new_cfg)
 
 	if d != "":
-		text = "Configuration change detected:" + "\n" + d
+		text = "**{}** configured by user **{}** at **{}**:".format(hostname, user ,timestamp)
 		room = get_room_id(SPARK_ROOM, bot_token)
 		if room == "":
 			do_error("Unable to get room ID")
-        	print text
 		if str(post_message(text, room, bot_token).status_code)[0] != '2':
 			do_error("Post message failed!")
+		else:
+			if str(post_message(d, room, bot_token).status_code)[0] != '2':
+				do_error("Post message failed!")
 	else:
 		do_error("No configuration change detected!")

@@ -65,14 +65,17 @@ def list_messages(room_id, token):
 						verify=False,headers=headers)
 	return resp.text
 
-def post_message(message_text, room_id, token):
+def post_message(message_text, room_id, token, markdown=False):
 
 	requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 	headers = {'Authorization':'Bearer '+token,
 				'Content-Type':'application/json'}
 
-	body = json.dumps({'roomId':room_id,'text':message_text})
+	if markdown:
+		body = json.dumps({'roomId':room_id,'markdown':message_text})
+	else:
+		body = json.dumps({'roomId':room_id,'text':message_text})
 
 	resp = requests.post('https://api.ciscospark.com/v1/messages',
 	verify=False,headers=headers,data=body,proxies=proxies)
